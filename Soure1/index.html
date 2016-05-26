@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+        <link rel="stylesheet" type="text/css" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/label.css" />
+        <link rel="stylesheet" href="css/MarkerCluster.css" />
+        <link rel="stylesheet" href="css/MarkerCluster.Default.css" />
+        <link rel="stylesheet" href="css/leaflet.draw.css" />
+        <link rel="stylesheet" href="css/leaflet.measurecontrol.css" />
+        <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+        <script src="js/OSMBuildings-Leaflet.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/label.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/leaflet.draw.js"></script>
+        <script src="js/leaflet.measurecontrol.js"></script>
+        <script src="js/leaflet.markercluster.js"></script>
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>Soure Map Ex1</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="data/json_CAR11.js"></script>
+        <script src="data/json_SAMGe12.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+            highlightLayer.openPopup();
+        }
+        L.ImageOverlay.include({
+            getBounds: function () {
+                return this._bounds;
+            }
+        });
+        var map = L.map('map', {
+            measureControl:true,
+            zoomControl:true, maxZoom:28, minZoom:1
+        })
+        var hash = new L.Hash(map);
+        map.attributionControl.addAttribution('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a>');
+        var feature_group = new L.featureGroup([]);
+        var bounds_group = new L.featureGroup([]);
+        var raster_group = new L.LayerGroup([]);
+        var basemap0 = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+            maxZoom: 28
+        });
+        basemap0.addTo(map);
+        var initialOrder = new Array();
+        var layerOrder = new Array();
+        function stackLayers() {
+            for (index = 0; index < initialOrder.length; index++) {
+                map.removeLayer(initialOrder[index]);
+                map.addLayer(initialOrder[index]);
+            }
+            if (bounds_group.getLayers().length) {
+                map.fitBounds(bounds_group.getBounds());
+            }
+            map.setMaxBounds(map.getBounds());
+        }
+        function restackLayers() {
+            for (index = 0; index < layerOrder.length; index++) {
+                layerOrder[index].bringToFront();
+            }
+        }
+        layerControl = L.control.layers({},{},{collapsed:false});
+        var overlay_Bioma0 = L.tileLayer.wms('http://mapasinterativos.ibge.gov.br/arcgis/services/BIOMA/MapServer/WMSServer?', {
+            layers: '0',
+            format: 'image/jpeg',
+            transparent: true,
+            continuousWorld : true,
+        });
+        raster_group.addLayer(overlay_Bioma0);
+        function pop_CAR11(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table><tr><th scope="row">OID_</th><td>' + (feature.properties['OID_'] !== null ? Autolinker.link(String(feature.properties['OID_'])) : '') + '</td></tr><tr><th scope="row">Name</th><td>' + (feature.properties['Name'] !== null ? Autolinker.link(String(feature.properties['Name'])) : '') + '</td></tr><tr><th scope="row">FolderPath</th><td>' + (feature.properties['FolderPath'] !== null ? Autolinker.link(String(feature.properties['FolderPath'])) : '') + '</td></tr><tr><th scope="row">SymbolID</th><td>' + (feature.properties['SymbolID'] !== null ? Autolinker.link(String(feature.properties['SymbolID'])) : '') + '</td></tr><tr><th scope="row">AltMode</th><td>' + (feature.properties['AltMode'] !== null ? Autolinker.link(String(feature.properties['AltMode'])) : '') + '</td></tr><tr><th scope="row">Base</th><td>' + (feature.properties['Base'] !== null ? Autolinker.link(String(feature.properties['Base'])) : '') + '</td></tr><tr><th scope="row">Clamped</th><td>' + (feature.properties['Clamped'] !== null ? Autolinker.link(String(feature.properties['Clamped'])) : '') + '</td></tr><tr><th scope="row">Extruded</th><td>' + (feature.properties['Extruded'] !== null ? Autolinker.link(String(feature.properties['Extruded'])) : '') + '</td></tr><tr><th scope="row">Snippet</th><td>' + (feature.properties['Snippet'] !== null ? Autolinker.link(String(feature.properties['Snippet'])) : '') + '</td></tr><tr><th scope="row">PopupInfo</th><td>' + (feature.properties['PopupInfo'] !== null ? Autolinker.link(String(feature.properties['PopupInfo'])) : '') + '</td></tr><tr><th scope="row">Shape_Leng</th><td>' + (feature.properties['Shape_Leng'] !== null ? Autolinker.link(String(feature.properties['Shape_Leng'])) : '') + '</td></tr><tr><th scope="row">Shape_Area</th><td>' + (feature.properties['Shape_Area'] !== null ? Autolinker.link(String(feature.properties['Shape_Area'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        function doStyleCAR11(feature) {
+			switch (feature.properties.Name) {
+                default:
+                    return {
+                    weight: '1.04',
+                    fillColor: '#a6611a',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '10317':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#ad6d26',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '10319':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#b47932',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '10660':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#bb853f',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '10670':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#c2914b',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '10805':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#c99d57',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '12112':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#d0a964',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '12351':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#d7b570',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '13665':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#dfc27d',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '13770':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#e1c88c',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '13776':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#e4ce9b',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '15543':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#e7d5aa',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '26527':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#eadbb9',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '27791':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#ece1c8',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '33708':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#efe8d7',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '41392':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#f2eee6',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '42157':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#f5f5f5',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '42763':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#e6f0ee',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '42819':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#d7ebe8',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '4481':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#c9e6e1',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '4482':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#bae1db',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '4486':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#abdcd4',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '50650':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#9dd7ce',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '6505':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#8ed2c7',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '6818':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#80cdc1',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '6822':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#70c4b7',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '7828':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#60bbad',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '8274':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#50b2a3',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '8718':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#40a999',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '9101':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#30a08f',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '9102':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#209785',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '9387':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#108e7b',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+                case '9569':
+                    return {
+                    weight: '1.04',
+                    fillColor: '#018571',
+                    color: '#000000',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    opacity: '1.0',
+                    fillOpacity: '1.0',
+                };
+                break;
+
+            }
+        }
+        var json_CAR11JSON = new L.geoJson(json_CAR11, {
+            onEachFeature: pop_CAR11,
+            style: doStyleCAR11
+        });
+        layerOrder[layerOrder.length] = json_CAR11JSON;
+        bounds_group.addLayer(json_CAR11JSON);
+        initialOrder[initialOrder.length] = json_CAR11JSON;
+        feature_group.addLayer(json_CAR11JSON);
+        function pop_SAMGe12(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table><tr><th scope="row">OID_</th><td>' + (feature.properties['OID_'] !== null ? Autolinker.link(String(feature.properties['OID_'])) : '') + '</td></tr><tr><th scope="row">Name</th><td>' + (feature.properties['Name'] !== null ? Autolinker.link(String(feature.properties['Name'])) : '') + '</td></tr><tr><th scope="row">FolderPath</th><td>' + (feature.properties['FolderPath'] !== null ? Autolinker.link(String(feature.properties['FolderPath'])) : '') + '</td></tr><tr><th scope="row">SymbolID</th><td>' + (feature.properties['SymbolID'] !== null ? Autolinker.link(String(feature.properties['SymbolID'])) : '') + '</td></tr><tr><th scope="row">AltMode</th><td>' + (feature.properties['AltMode'] !== null ? Autolinker.link(String(feature.properties['AltMode'])) : '') + '</td></tr><tr><th scope="row">Base</th><td>' + (feature.properties['Base'] !== null ? Autolinker.link(String(feature.properties['Base'])) : '') + '</td></tr><tr><th scope="row">Clamped</th><td>' + (feature.properties['Clamped'] !== null ? Autolinker.link(String(feature.properties['Clamped'])) : '') + '</td></tr><tr><th scope="row">Extruded</th><td>' + (feature.properties['Extruded'] !== null ? Autolinker.link(String(feature.properties['Extruded'])) : '') + '</td></tr><tr><th scope="row">Snippet</th><td>' + (feature.properties['Snippet'] !== null ? Autolinker.link(String(feature.properties['Snippet'])) : '') + '</td></tr><tr><th scope="row">PopupInfo</th><td>' + (feature.properties['PopupInfo'] !== null ? Autolinker.link(String(feature.properties['PopupInfo'])) : '') + '</td></tr><tr><th scope="row">Shape_Leng</th><td>' + (feature.properties['Shape_Leng'] !== null ? Autolinker.link(String(feature.properties['Shape_Leng'])) : '') + '</td></tr><tr><th scope="row">Shape_Area</th><td>' + (feature.properties['Shape_Area'] !== null ? Autolinker.link(String(feature.properties['Shape_Area'])) : '') + '</td></tr></table>';
+            layer.bindPopup(popupContent);
+        }
+
+        function doStyleSAMGe12(feature) {
+            return {
+                weight: 1.04,
+                color: '#000000',
+                fillColor: '#63b8f8',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                opacity: 1.0,
+                fillOpacity: 1.0
+            };
+        }
+        var json_SAMGe12JSON = new L.geoJson(json_SAMGe12, {
+            onEachFeature: pop_SAMGe12,
+            style: doStyleSAMGe12
+        });
+        layerOrder[layerOrder.length] = json_SAMGe12JSON;
+        bounds_group.addLayer(json_SAMGe12JSON);
+        initialOrder[initialOrder.length] = json_SAMGe12JSON;
+        feature_group.addLayer(json_SAMGe12JSON);
+        raster_group.addTo(map);
+        feature_group.addTo(map);
+        var baseMaps = {'OSM': basemap0};
+        L.control.layers(baseMaps,{'<img src="legend/SAMGe12.png" /> SAMGe1': json_SAMGe12JSON,'CAR1<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_.png" /> <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_10317.png" /> 10317<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_10319.png" /> 10319<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_10660.png" /> 10660<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_10670.png" /> 10670<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_10805.png" /> 10805<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_12112.png" /> 12112<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_12351.png" /> 12351<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_13665.png" /> 13665<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_13770.png" /> 13770<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_13776.png" /> 13776<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_15543.png" /> 15543<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_26527.png" /> 26527<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_27791.png" /> 27791<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_33708.png" /> 33708<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_41392.png" /> 41392<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_42157.png" /> 42157<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_42763.png" /> 42763<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_42819.png" /> 42819<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_4481.png" /> 4481<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_4482.png" /> 4482<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_4486.png" /> 4486<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_50650.png" /> 50650<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_6505.png" /> 6505<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_6818.png" /> 6818<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_6822.png" /> 6822<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_7828.png" /> 7828<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_8274.png" /> 8274<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_8718.png" /> 8718<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_9101.png" /> 9101<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_9102.png" /> 9102<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_9387.png" /> 9387<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="legend/CAR11_9569.png" /> 9569<br />': json_CAR11JSON,"Bioma": overlay_Bioma0,},{collapsed:false}).addTo(map);
+        L.control.scale({options: {position: 'bottomleft', maxWidth: 100, metric: true, imperial: false, updateWhenIdle: false}}).addTo(map);
+        stackLayers();
+        map.on('overlayadd', restackLayers);
+        </script>
+    </body>
+</html>
