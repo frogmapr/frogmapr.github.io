@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="map" style="height:1024px;width:768px;">
+    </div>
+    <script>
+      var NPMap = {
+        "baseLayers": [
+          "nps-parkTiles"
+        ],
+        "center": {
+          "lat": -28.19278261765116,
+          "lng": -49.528083801269524
+        },
+        "div": "map",
+        "editControl": true,
+        "fullscreenControl": true,
+        "geocoderControl": true,
+        "hashControl": false,
+        "homeControl": true,
+        "locateControl": true,
+        "mapId": "a6aced4a-55fb-42d8-9de8-7e3228870c20",
+        "measureControl": true,
+        "overlays": [
+          {
+            "type": "geojson",
+            "url": "https://andrewjander.cartodb.com/api/v2/sql?q=SELECT * FROM sajobnd&format=geojson",
+            "name": "SAJO Boundary",
+            "styles": {
+              "point": {
+                "marker-color": "#000000",
+                "marker-library": "maki",
+                "marker-size": "medium",
+                "marker-symbol": null
+              }
+            }
+          },
+          {
+            "type": "geojson",
+            "url": "https://andrewjander.cartodb.com/api/v2/sql?q=SELECT * FROM sajocontours&format=geojson",
+            "name": "Topo lines",
+            "styles": {
+              "line": {
+                "stroke": "#6c6c6c",
+                "stroke-width": "2",
+                "stroke-opacity": "0.8"
+              }
+            }
+          },
+          {
+            "type": "geojson",
+            "url": "https://andrewjander.cartodb.com/api/v2/sql?q=SELECT * FROM sajorivers&format=geojson",
+            "name": "Rivers",
+            "styles": {
+              "line": {
+                "stroke": "#88ccee",
+                "stroke-width": "3",
+                "stroke-opacity": "0.8"
+              }
+            },
+            "tooltip": "River Name: &lt;strong&gt;{{name}}&lt;/"
+          },
+          {
+            "type": "geojson",
+            "url": "https://andrewjander.cartodb.com/api/v2/sql?q=SELECT * FROM sajopoi&format=geojson",
+            "name": "Points of Interst",
+            "styles": {
+              "point": {
+                "marker-library": "npmapsymbollibrary",
+                "marker-symbol": "information-white",
+                "marker-color": "#000000",
+                "marker-size": "medium"
+              }
+            },
+            "tooltip": " This Point Is: &lt;strong&gt;{{name}}&lt;/"
+          }
+        ],
+        "overviewControl": {
+          "layer": "nps-parkTiles"
+        },
+        "printControl": true,
+        "scaleControl": true,
+        "smallzoomControl": true,
+        "zoom": 12
+      };
+
+      var s = document.createElement('script');
+      s.src = 'https://www.nps.gov/lib/npmap.js/3.0.15/npmap-bootstrap.min.js';
+      document.body.appendChild(s);
+    </script>
+  </body>
+</html>
